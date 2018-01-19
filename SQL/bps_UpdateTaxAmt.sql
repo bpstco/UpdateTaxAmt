@@ -1,0 +1,24 @@
+USE [bentley]
+GO
+/****** Object:  StoredProcedure [dbo].[bps_UpdateTaxAmt]    Script Date: 1/16/2018 11:53:01 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[bps_UpdateTaxAmt]
+AS
+BEGIN
+
+BEGIN TRANSACTION
+UPDATE ht
+	SET ht.TAX_AMT = (SELECT COALESCE(SUM(TAX_AMT), 0) 
+	  FROM PS_DOC_TAX t
+	  WHERE ht.DOC_ID = t.DOC_ID and ht.TOT_TYP = t.TAX_DOC_PART
+	  )
+FROM PS_DOC_HDR_TOT ht
+JOIN PS_DOC_HDR h ON ht.DOC_ID = h.DOC_ID
+WHERE h.STR_ID = '149' and h.USR_ID = 'WEBSTR' and h.DOC_TYP = 'T'
+COMMIT;
+
+END
